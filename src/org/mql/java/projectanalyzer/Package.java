@@ -1,4 +1,4 @@
-package org.mql.java.projectscanner;
+package org.mql.java.projectanalyzer;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,10 @@
-package org.mql.java.projectscanner;
+package org.mql.java.projectanalyzer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mql.java.projectscanner.filesystem.DynamicClassLoader;
+import org.mql.java.projectanalyzer.filesystem.DynamicClassLoader;
 
 public class Project {
 	private String srcPath;

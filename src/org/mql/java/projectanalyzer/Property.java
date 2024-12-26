@@ -1,4 +1,4 @@
-package org.mql.java.projectscanner;
+package org.mql.java.projectanalyzer;
 
 public class Property {
 

@@ -1,4 +1,4 @@
-package org.mql.java.projectscanner.filesystem;
+package org.mql.java.projectanalyzer.filesystem;
 
 import java.io.File;
 import java.net.MalformedURLException;

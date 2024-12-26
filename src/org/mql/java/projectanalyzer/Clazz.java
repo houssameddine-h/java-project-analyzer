@@ -1,6 +1,6 @@
-package org.mql.java.projectscanner;
+package org.mql.java.projectanalyzer;
 
-import org.mql.java.projectscanner.enums.ClassType;
+import org.mql.java.projectanalyzer.enums.ClassType;
 
 public class Clazz {
 	private String name;

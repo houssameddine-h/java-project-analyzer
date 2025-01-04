@@ -1,29 +1,26 @@
 package org.mql.java.projectanalyzer;
 
-public class Main {
+import org.mql.java.projectanalyzer.relations.Relation;
 
+public class Main {
+	private static final String PROJECT_PATH = "D:\\BackUp\\School\\Master\\Java\\p03-reflection-and-annotations_prof";
 	public Main() {
-		projectScannerExample();
+		projectAnalyzerExample();
 	}
 	
-	void projectScannerExample() {
-		Project project = new Project("D:\\BackUp\\School\\Master\\Java\\p03-reflection-and-annotations_prof");
-//		for (Package pack : project.getPackages()) {
-//			log(pack.getName());
-//			for (Clazz cls : pack.getClasses()) {
-//				log("    " + cls.getName());
-//			}
-//		}
-		Package[] packages = project.getPackages();
-		Clazz[] cls = packages[packages.length - 1].getClasses();
-		log(cls[cls.length - 1].getName());
-		try {
-			Class<?> c = Class.forName(cls[cls.length - 1].getName());			
+	void projectAnalyzerExample() {
+		Project project = new Project(PROJECT_PATH);
+		for (Package pack : project.getPackages()) {
+			String packageName = pack.getName();
+			log(packageName);
+			for (Clazz clz : pack.getClasses()) {
+				log("    " + clz.getName().replace(packageName + ".", "") + " : " + clz.getType());
+				Relation relations[] = clz.getRelations();
+				for (Relation relation : relations) {
+					log("    🔗 " + relation);
+				}
+			}
 		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		
 	}
 	
 	private void log(Object o) {

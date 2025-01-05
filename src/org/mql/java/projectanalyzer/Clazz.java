@@ -2,6 +2,8 @@ package org.mql.java.projectanalyzer;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.mql.java.projectanalyzer.enums.ClassType;
 import org.mql.java.projectanalyzer.relations.Association;
@@ -12,13 +14,11 @@ public class Clazz {
 	private Class<?> wrappedClass;
 	private String name;
 	private ClassType type;
-//	private Relation[] relations;
 	
 	public Clazz(Class<?> wrappedClass) {
 		this.wrappedClass = wrappedClass;
 		name = wrappedClass.getSimpleName();
 		type = getClassType(wrappedClass);
-//		relations = findClassRelations(wrappedClass);
 	}
 
 	public String getName() {
@@ -29,8 +29,9 @@ public class Clazz {
 		return type;
 	}
 	
-	public Relation[] getRelations() {
-		return findClassRelations(wrappedClass);
+	public boolean hasRelationWith(RelationType relationType, Clazz with) {
+		
+		return true;
 	}
 	
 	public static ClassType getClassType(Class<?> cls) {
@@ -42,19 +43,47 @@ public class Clazz {
 		return type;
 	}
 	
-	private Relation[] findClassRelations(Class<?> cls) {
-		ArrayList<Relation> relations = new ArrayList<>();
-		// look for extension
+	public Relation getExtension() {
 		if (type == ClassType.CLASS) { // other types can't have custom super calss
-			Class<?> superClass = cls.getSuperclass();
+			Class<?> superClass = wrappedClass.getSuperclass();
 			if (!Object.class.equals(superClass)) {
-				relations.add(
-					new Relation(RelationType.EXTENSION, this, new Clazz(superClass))
+				return new Relation(RelationType.EXTENSION, this, new Clazz(superClass));
+			}
+		}
+		return null;
+	}
+	
+	public Collection<Association> getAssociations() {
+		List<Association> associations = new ArrayList<>();
+		Field fields[] = wrappedClass.getDeclaredFields();
+		for (Field field : fields) {
+			Class<?> fieldType = field.getType();
+			if (fieldType.isArray()) {
+				fieldType = fieldType.getComponentType();
+			}
+			if (!fieldType.isPrimitive()) {
+				associations.add(
+					new Association(this, new Clazz(fieldType))
 				);
 			}
 		}
-		
-		Relation[] r = new Relation[relations.size()];
-		return relations.toArray(r);
+		return associations;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

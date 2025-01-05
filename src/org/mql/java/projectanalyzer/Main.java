@@ -15,7 +15,7 @@ public class Main {
 			log(packageName);
 			for (Clazz clz : pack.getClasses()) {
 				log("    " + clz.getName().replace(packageName + ".", "") + " : " + clz.getType());
-				Relation relations[] = clz.getRelations();
+				Relation relations[] = project.getRelationsOfClass(clz);
 				for (Relation relation : relations) {
 					log("    🔗 " + relation);
 				}

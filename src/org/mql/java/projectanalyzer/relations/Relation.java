@@ -25,6 +25,10 @@ public class Relation {
 		return targetClass;
 	}
 	
+	public boolean hasClass(Clazz clz) {
+		return (sourceClass.equals(clz) || targetClass.equals(clz));
+	}
+	
 	public String toString() {
 		return "[ " + type + ", " +
 				sourceClass.getName() + ", " +

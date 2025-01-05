@@ -2,12 +2,12 @@ package org.mql.java.projectanalyzer;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mql.java.projectanalyzer.filesystem.DynamicClassLoader;
+import org.mql.java.projectanalyzer.relations.Relation;
 
 public class Project {
 	public static final String JAVA_FILE_EXTENSION = ".java";
@@ -15,12 +15,14 @@ public class Project {
 	private String srcPath;
 	private String binPath;
 	private List<Package> packages;
+	private List<Relation> relations;
 	
 	private DynamicClassLoader classLoader;
 	
 	public Project(String projectPath) {
 		packages = new ArrayList<>();
 		packages.add(new Package()); // add default package
+		relations = new ArrayList<>();
 		
 		File srcDir = new File(projectPath + "/src");
 		File binDir = new File(projectPath + "/bin");
@@ -35,6 +37,8 @@ public class Project {
 
 		// scan for packages and classes
 		scanDir(srcDir, packages.getFirst());
+		// find relations between classes
+		findClassRelations();
 	}
 	
 	// scan a package (directory) and put found sub-packages & classes into destPackage
@@ -56,7 +60,7 @@ public class Project {
 						.replaceAll("\\" + JAVA_FILE_EXTENSION + "$", "");
 				try {
 					Class<?> cls = classLoader.forName(className);
-					Clazz clz = new Clazz(cls); //.replace(destPackage.getName() + ".", ""));
+					Clazz clz = new Clazz(cls);
 					destPackage.addClass(clz);
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
@@ -65,9 +69,39 @@ public class Project {
 		}
 	}
 	
-	public Package[] getPackages() {
-		Package[] packs = new Package[packages.size()];
-		return packages.toArray(packs);
+	public boolean containsPackage(String packageName) {
+		for (Package packg : packages) {
+			if (packg.getName() == packageName) {
+				return true;
+			}
+		}
+		return false;
 	}
-
+	
+	public Package[] getPackages() {
+		return packages.toArray(Package[]::new);
+	}
+	
+	public Relation[] getRelations() {
+		return relations.toArray(Relation[]::new);
+	}
+	
+	public Relation[] getRelationsOfClass(Clazz clz) {
+		return relations.stream()
+					.filter(relation -> relation.hasClass(clz))
+					.collect(Collectors.toList())
+					.toArray(Relation[]::new);
+	}
+	
+	private void findClassRelations() {
+		for (Package packg : packages) {
+			for (Clazz clz : packg.getClasses()) {
+				Relation extension = clz.getExtension();
+				if (extension != null) {
+					relations.add(extension);
+				}
+				relations.addAll(clz.getAssociations());
+			}
+		}
+	}
 }

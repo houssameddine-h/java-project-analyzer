@@ -61,7 +61,11 @@ public class Clazz {
 			if (fieldType.isArray()) {
 				fieldType = fieldType.getComponentType();
 			}
-			if (!fieldType.isPrimitive()) {
+			// enum values are instances of the enum type, so we ignore them
+//			if (type == ClassType.ENUMERATION && fieldType.equals(wrappedClass)) {
+//				continue;
+//			}
+			if (!fieldType.isPrimitive() && !(type == ClassType.ENUMERATION && fieldType.equals(wrappedClass))) {
 				associations.add(
 					new Association(this, new Clazz(fieldType))
 				);

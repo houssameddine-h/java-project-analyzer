@@ -7,8 +7,8 @@ public class Association extends Relation {
 //	private CardinalityValue targetCardinality;
 	
 	public Association(
-			Clazz sourceClass,
-			Clazz targetClass)
+			Class<?> sourceClass,
+			Class<?> targetClass)
 //			CardinalityValue sourceCardinality,
 //			CardinalityValue targetCardinality)
 	{

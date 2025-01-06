@@ -3,7 +3,7 @@ package org.mql.java.projectanalyzer;
 import org.mql.java.projectanalyzer.relations.Relation;
 
 public class Main {
-	private static final String PROJECT_PATH = "D:\\BackUp\\School\\Master\\Java\\p03-reflection-and-annotations_prof";
+	private static final String PROJECT_PATH = "D:\\BackUp\\School\\Master\\Java\\JavaProjectAnalyzer";
 	public Main() {
 		projectAnalyzerExample();
 	}
@@ -12,12 +12,12 @@ public class Main {
 		Project project = new Project(PROJECT_PATH);
 		for (Package pack : project.getPackages()) {
 			String packageName = pack.getName();
-			log(packageName);
+			log("📁 " + packageName);
 			for (Clazz clz : pack.getClasses()) {
-				log("    " + clz.getName().replace(packageName + ".", "") + " : " + clz.getType());
+				log("    📜 " + clz.getName() + " : " + clz.getType());
 				Relation relations[] = project.getRelationsOfClass(clz);
 				for (Relation relation : relations) {
-					log("    🔗 " + relation);
+					log("\t🔗 " + relation);
 				}
 			}
 		}

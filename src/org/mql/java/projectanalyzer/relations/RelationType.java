@@ -1,11 +1,10 @@
 package org.mql.java.projectanalyzer.relations;
 
 public enum RelationType {
+	//	COMPOSITION and AGGREGATION are generalized within association.
+
 	EXTENSION,
-	
 	ASSOCIATION,
-	
-//	AGGREGATION, (generalized with association)
-	
-	DEPENDENCY
+	DEPENDENCY,
+	REALISATION
 }

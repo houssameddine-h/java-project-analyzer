@@ -27,8 +27,7 @@ public class Package {
 	}
 	
 	public Clazz[] getClasses() {
-		Clazz[] data = new Clazz[classes.size()];
-		return classes.toArray(data);
+		return classes.toArray(Clazz[]::new);
 	}
 	
 	public void addClass(Clazz cls) {

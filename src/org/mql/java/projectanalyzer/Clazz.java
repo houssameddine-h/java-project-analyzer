@@ -51,6 +51,9 @@ public class Clazz {
 	public Collection<Relation> getRelations() {
 		List<Relation> relations = new ArrayList<>();
 		Optional<Relation> extensionOpt = getExtension();
+		if (extensionOpt.isPresent()) {
+			relations.add(extensionOpt.get());
+		}
 		Collection<Association> associations = getAssociations();
 		// add associations that are not already in extension
 		for (Association association : associations) {
@@ -74,6 +77,9 @@ public class Clazz {
 			// will reach this part only when the relation is a new one
 			relations.add(dependency);
 		}
+		Collection<Relation> realisations = getRealisations();
+		relations.addAll(realisations);
+		
 		return relations;
 	}
 	
@@ -138,6 +144,23 @@ public class Clazz {
 			}
 		}
 		return dependencies;
+	}
+	
+	public Collection<Relation> getRealisations() {
+		Collection<Relation> realisations = new ArrayList<>();
+		// annotations can't implement other interfaces
+		if (type != ClassType.ANNOTATION) {
+			Class<?> interfaces[] = wrappedClass.getInterfaces();
+			for (Class<?> interf : interfaces) {
+				if (type != ClassType.INTERFACE) {
+					System.out.println(">>> " + this.name + " :: " + interf.getSimpleName());
+				}
+				realisations.add(
+						new Relation(RelationType.REALISATION, wrappedClass, interf)
+						);
+			}
+		}
+		return realisations;
 	}
 }
 

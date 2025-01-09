@@ -96,12 +96,6 @@ public class Project {
 	private void findClassRelations() {
 		for (Package packg : packages) {
 			for (Clazz clz : packg.getClasses()) {
-//				Relation extension = clz.getExtension();
-//				if (extension != null) {
-//					relations.add(extension);
-//				}
-//				relations.addAll(clz.getAssociations());
-//				relations.addAll(clz.getDependencies());
 				relations.addAll(clz.getRelations());
 			}
 		}

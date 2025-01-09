@@ -48,6 +48,14 @@ public class Clazz {
 		return type;
 	}
 	
+	private static Class<?> componentType(Class<?> cls) {
+		Class<?> type = cls;
+		if (cls != null && cls.isArray()) {
+			type = type.getComponentType();
+		}
+		return type;
+	}
+	
 	public Collection<Relation> getRelations() {
 		List<Relation> relations = new ArrayList<>();
 		Optional<Relation> extensionOpt = getExtension();
@@ -87,20 +95,19 @@ public class Clazz {
 		if (type == ClassType.CLASS) { // other types can't have custom super calss
 			Class<?> superClass = wrappedClass.getSuperclass();
 			if (!Object.class.equals(superClass)) {
-				return Optional.of(new Relation(RelationType.EXTENSION, wrappedClass, superClass));
+				return Optional.of(
+					new Relation(RelationType.EXTENSION, wrappedClass, superClass)
+				);
 			}
 		}
 		return Optional.empty();
 	}
 	
 	public Collection<Association> getAssociations() {
-		List<Association> associations = new ArrayList<>();
+		Collection<Association> associations = new ArrayList<>();
 		Field fields[] = wrappedClass.getDeclaredFields();
 		for (Field field : fields) {
-			Class<?> fieldType = field.getType();
-			if (fieldType.isArray()) {
-				fieldType = fieldType.getComponentType();
-			}
+			Class<?> fieldType = componentType(field.getType());
 			// enum values are instances of the enum type, so we ignore them
 			if (!fieldType.isPrimitive() &&
 					!(type == ClassType.ENUMERATION && fieldType.equals(wrappedClass))) {
@@ -113,34 +120,25 @@ public class Clazz {
 	}
 	
 	public Collection<Relation> getDependencies() {
-		List<Relation> dependencies = new ArrayList<>();
+		Collection<Relation> dependencies = new ArrayList<>();
+		List<Class<?>> foundTypes = new ArrayList<>();
 		Method methods[] = wrappedClass.getDeclaredMethods();
 		for (Method method : methods) {
-			// return type dependency
-			Class<?> returnType = method.getReturnType();
-			if (returnType.isArray()) {
-				returnType = returnType.getComponentType();
-			}
-			// ignore void and self dependencies
-			if (!returnType.isPrimitive() &&
-				!returnType.equals(void.class)
-				&& !returnType.equals(wrappedClass)) {
-				dependencies.add(
-					new Relation(RelationType.DEPENDENCY, wrappedClass, returnType)
-				);
-			}
-			// parameters dependencies
+			foundTypes.add(componentType(method.getReturnType()));
 			Class<?> paramsTypes[] = method.getParameterTypes();
 			for (Class<?> paramType : paramsTypes) {
-				if (paramType.isArray()) {
-					paramType = paramType.getComponentType();
-				}
-				// ignore self dependencies
-				if (!paramType.isPrimitive() && !paramType.equals(wrappedClass)) {
-					dependencies.add(
-						new Relation(RelationType.DEPENDENCY, wrappedClass, paramType)
-					);
-				}
+				foundTypes.add(componentType(paramType));
+			}
+		}
+		
+		for (Class<?> type : foundTypes) {
+			// ignore primitives, void and self dependencies
+			if (!type.isPrimitive() &&
+				!type.equals(void.class) &&
+				!type.equals(wrappedClass)) {
+				dependencies.add(
+					new Relation(RelationType.DEPENDENCY, wrappedClass, type)
+				);
 			}
 		}
 		return dependencies;
@@ -152,12 +150,9 @@ public class Clazz {
 		if (type != ClassType.ANNOTATION) {
 			Class<?> interfaces[] = wrappedClass.getInterfaces();
 			for (Class<?> interf : interfaces) {
-				if (type != ClassType.INTERFACE) {
-					System.out.println(">>> " + this.name + " :: " + interf.getSimpleName());
-				}
 				realisations.add(
-						new Relation(RelationType.REALISATION, wrappedClass, interf)
-						);
+					new Relation(RelationType.REALISATION, wrappedClass, interf)
+				);
 			}
 		}
 		return realisations;

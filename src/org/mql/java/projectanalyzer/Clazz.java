@@ -3,24 +3,28 @@ package org.mql.java.projectanalyzer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.mql.java.projectanalyzer.enums.ClassType;
 import org.mql.java.projectanalyzer.relations.Association;
 import org.mql.java.projectanalyzer.relations.Relation;
+import org.mql.java.projectanalyzer.relations.RelationManager;
 import org.mql.java.projectanalyzer.relations.RelationType;
 
 public class Clazz {
 	private Class<?> wrappedClass;
 	private String name;
 	private ClassType type;
+	private RelationManager relationManager;
+	private boolean foundRelations;
 	
 	public Clazz(Class<?> wrappedClass) {
 		this.wrappedClass = wrappedClass;
 		name = wrappedClass.getSimpleName();
 		type = getClassType(wrappedClass);
+		foundRelations = false;
+		relationManager = new RelationManager();
 	}
 
 	public String getName() {
@@ -56,42 +60,31 @@ public class Clazz {
 		return type;
 	}
 	
-	public Collection<Relation> getRelations() {
-		List<Relation> relations = new ArrayList<>();
-		Optional<Relation> extensionOpt = getExtension();
-		if (extensionOpt.isPresent()) {
-			relations.add(extensionOpt.get());
+	public Relation[] getRelations() {
+		if (!foundRelations) {
+			findRelations(); // updates relation manager
+			foundRelations = true;
 		}
-		Collection<Association> associations = getAssociations();
-		// add associations that are not already in extension
-		for (Association association : associations) {
-			if (!(extensionOpt.isPresent() &&
-					extensionOpt.get().hasClass(association.getTargetClass()))) {
-				relations.add(association);
-			}
-		}
-		Collection<Relation> dependencies = getDependencies();
-		// add dependencies that are not already in associations or extension
-		outerForeach:
-		for (Relation dependency : dependencies) {
-			if (extensionOpt.isPresent() && extensionOpt.get().hasClass(dependency.getTargetClass())) {
-				continue;
-			}
-			for (Association association : associations) {
-				if (association.hasClass(dependency.getTargetClass())) {
-					continue outerForeach;
-				}
-			}
-			// will reach this part only when the relation is a new one
-			relations.add(dependency);
-		}
-		Collection<Relation> realisations = getRealisations();
-		relations.addAll(realisations);
-		
-		return relations;
+
+		return relationManager.getRelations();
 	}
 	
-	public Optional<Relation> getExtension() {
+	private void findRelations() {
+		// extension
+		Optional<Relation> extensionOpt = getExtension();
+		extensionOpt.ifPresent(ext -> relationManager.addRelation(ext));
+		
+		// realisations
+		relationManager.addRelation(getRealisations());
+		
+		// associations
+		relationManager.addRelation(getAssociations());
+		
+		// dependencies
+		relationManager.addRelation(getDependencies());
+	}
+	
+	private Optional<Relation> getExtension() {
 		if (type == ClassType.CLASS) { // other types can't have custom super calss
 			Class<?> superClass = wrappedClass.getSuperclass();
 			if (!Object.class.equals(superClass)) {
@@ -103,8 +96,22 @@ public class Clazz {
 		return Optional.empty();
 	}
 	
-	public Collection<Association> getAssociations() {
-		Collection<Association> associations = new ArrayList<>();
+	private Relation[] getRealisations() {
+		List<Relation> realisations = new ArrayList<>();
+		// annotations can't implement interfaces
+		if (type != ClassType.ANNOTATION) {
+			Class<?> interfaces[] = wrappedClass.getInterfaces();
+			for (Class<?> interf : interfaces) {
+				realisations.add(
+					new Relation(RelationType.REALISATION, wrappedClass, interf)
+				);
+			}
+		}
+		return realisations.toArray(Relation[]::new);
+	}
+	
+	private Association[] getAssociations() {
+		List<Association> associations = new ArrayList<>();
 		Field fields[] = wrappedClass.getDeclaredFields();
 		for (Field field : fields) {
 			Class<?> fieldType = componentType(field.getType());
@@ -116,11 +123,11 @@ public class Clazz {
 				);
 			}
 		}
-		return associations;
+		return associations.toArray(Association[]::new);
 	}
 	
-	public Collection<Relation> getDependencies() {
-		Collection<Relation> dependencies = new ArrayList<>();
+	private Relation[] getDependencies() {
+		List<Relation> dependencies = new ArrayList<>();
 		List<Class<?>> foundTypes = new ArrayList<>();
 		Method methods[] = wrappedClass.getDeclaredMethods();
 		for (Method method : methods) {
@@ -141,21 +148,7 @@ public class Clazz {
 				);
 			}
 		}
-		return dependencies;
-	}
-	
-	public Collection<Relation> getRealisations() {
-		Collection<Relation> realisations = new ArrayList<>();
-		// annotations can't implement other interfaces
-		if (type != ClassType.ANNOTATION) {
-			Class<?> interfaces[] = wrappedClass.getInterfaces();
-			for (Class<?> interf : interfaces) {
-				realisations.add(
-					new Relation(RelationType.REALISATION, wrappedClass, interf)
-				);
-			}
-		}
-		return realisations;
+		return dependencies.toArray(Relation[]::new);
 	}
 }
 

@@ -96,7 +96,11 @@ public class Project {
 	private void findClassRelations() {
 		for (Package packg : packages) {
 			for (Clazz clz : packg.getClasses()) {
-				relations.addAll(clz.getRelations());
+				Relation rels[] = clz.getRelations();
+				for (Relation relation : rels) {
+					relations.add(relation);
+				}
+//				relations.addAll(clz.getRelations());
 			}
 		}
 	}

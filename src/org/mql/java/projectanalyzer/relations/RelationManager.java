@@ -11,6 +11,10 @@ public class RelationManager {
 		relations = new ArrayList<>();
 	}
 	
+	public Relation[] getRelations() {
+		return relations.toArray(Relation[]::new);
+	}
+	
 	public boolean contains(Relation relation) {
 		for (Relation rel : relations) {
 			if (rel.equals(relation)) {
@@ -27,16 +31,18 @@ public class RelationManager {
 	}
 	
 	public void addRelation(Relation relation) {
-		removeRedundant(relation);
-		/* TODO: check if type is dependency and
-		 * already exists before adding new one
-		 */
 		/* TODO: if type is association and already exists, update
 		 * its cardinalities instead of adding new one
 		 */
-		relations.add(relation);
+		if (!isRedundant(relation)) {
+			removeRedundant(relation);
+			relations.add(relation);
+		}
 	}
 	
+	/**
+	 * Remove weaker relations than { @param relation }
+	 */
 	public void removeRedundant(Relation relation) {
 		List<RelationType> redundantTypes =
 				RelationType.getWeakerThan(relation.getType());
@@ -47,6 +53,21 @@ public class RelationManager {
 				i.remove();
 			}
 		}
+	}
+	
+	/**
+	 * Checks if a stronger relation than { @param relation } exists
+	 */
+	private boolean isRedundant(Relation relation) {
+		List<RelationType> redundantTypes =
+				RelationType.getStrongerThan(relation.getType());
+		for (Relation rel : relations) {
+			if (redundantTypes.contains(relation.getType()) &&
+					rel.compareToIgnoreType(relation) == 1) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

@@ -3,11 +3,13 @@ package org.mql.java.projectanalyzer;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.mql.java.projectanalyzer.filesystem.DynamicClassLoader;
 import org.mql.java.projectanalyzer.relations.Relation;
+import org.mql.java.projectanalyzer.relations.RelationManager;
 
 public class Project {
 	public static final String JAVA_FILE_EXTENSION = ".java";
@@ -15,14 +17,14 @@ public class Project {
 	private String srcPath;
 	private String binPath;
 	private List<Package> packages;
-	private List<Relation> relations;
+	private RelationManager relationManager;
 	
 	private DynamicClassLoader classLoader;
 	
 	public Project(String projectPath) {
 		packages = new ArrayList<>();
 		packages.add(new Package()); // add default package
-		relations = new ArrayList<>();
+		relationManager = new RelationManager();
 		
 		File srcDir = new File(projectPath + "/src");
 		File binDir = new File(projectPath + "/bin");
@@ -83,11 +85,11 @@ public class Project {
 	}
 	
 	public Relation[] getRelations() {
-		return relations.toArray(Relation[]::new);
+		return relationManager.getRelations();
 	}
 	
 	public Relation[] getRelationsOfClass(Clazz clz) {
-		return relations.stream()
+		return Arrays.stream(relationManager.getRelations())
 					.filter(relation -> relation.hasClass(clz))
 					.collect(Collectors.toList())
 					.toArray(Relation[]::new);
@@ -96,11 +98,7 @@ public class Project {
 	private void findClassRelations() {
 		for (Package packg : packages) {
 			for (Clazz clz : packg.getClasses()) {
-				Relation rels[] = clz.getRelations();
-				for (Relation relation : rels) {
-					relations.add(relation);
-				}
-//				relations.addAll(clz.getRelations());
+				relationManager.addClearedRelations(clz.getRelations());
 			}
 		}
 	}

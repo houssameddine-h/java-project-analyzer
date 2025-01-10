@@ -15,6 +15,36 @@ public class RelationManager {
 		return relations.toArray(Relation[]::new);
 	}
 	
+	public void addRelation(Relation[] relations) {
+		for (Relation rel : relations) {
+			addRelation(rel);
+		}
+	}
+	
+	public void addRelation(Relation relation) {
+		/* 
+		 * TODO: if type is association and already exists, update
+		 * its cardinalities instead of adding new one
+		 */
+		if (!isRedundant(relation)) {
+			removeRedundant(relation);
+			relations.add(relation);
+		}
+	}
+	
+	/*
+	 * add relations already cleared of redundancies
+	 */
+	public void addClearedRelations(Relation[] rels) {
+		/* 
+		 * TODO: if type is association and already exists, update
+		 * its cardinalities instead of adding new one
+		 */
+		for (Relation relation : rels) {
+			relations.add(relation);
+		}
+	}
+	
 	public boolean contains(Relation relation) {
 		for (Relation rel : relations) {
 			if (rel.equals(relation)) {
@@ -24,26 +54,10 @@ public class RelationManager {
 		return false;
 	}
 	
-	public void addRelation(Relation[] relation) {
-		for (Relation rel : relation) {
-			addRelation(rel);
-		}
-	}
-	
-	public void addRelation(Relation relation) {
-		/* TODO: if type is association and already exists, update
-		 * its cardinalities instead of adding new one
-		 */
-		if (!isRedundant(relation)) {
-			removeRedundant(relation);
-			relations.add(relation);
-		}
-	}
-	
 	/**
 	 * Remove weaker relations than { @param relation }
 	 */
-	public void removeRedundant(Relation relation) {
+	private void removeRedundant(Relation relation) {
 		List<RelationType> redundantTypes =
 				RelationType.getWeakerThan(relation.getType());
 		for (Iterator<Relation> i = relations.iterator(); i.hasNext();) {
@@ -69,5 +83,4 @@ public class RelationManager {
 		}
 		return false;
 	}
-
 }

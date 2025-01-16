@@ -88,17 +88,17 @@ public class Project {
 		return relationManager.getRelations();
 	}
 	
-	public Relation[] getRelationsOfClass(Clazz clz) {
-		return Arrays.stream(relationManager.getRelations())
-					.filter(relation -> relation.hasClass(clz))
-					.collect(Collectors.toList())
+	public Relation[] getRelations(Clazz clz) {
+		return Arrays.stream(getRelations())
+//					.filter(relation -> relation.hasClass(clz))
+					.filter(relation -> relation.getSourceClass().equals(clz.getWrappedClass()))
 					.toArray(Relation[]::new);
 	}
 	
 	private void findClassRelations() {
 		for (Package packg : packages) {
 			for (Clazz clz : packg.getClasses()) {
-				relationManager.addClearedRelations(clz.getRelations());
+				relationManager.addCleanedRelations(clz.getRelations());
 			}
 		}
 	}

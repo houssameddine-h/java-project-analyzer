@@ -1,27 +1,38 @@
 package org.mql.java.projectanalyzer.relations;
 
-import org.mql.java.projectanalyzer.Clazz;
-
 public class Association extends Relation {
-//	private CardinalityValue sourceCardinality;
-//	private CardinalityValue targetCardinality;
-	
+	private Navigability navigability;
+	private boolean isSelfAssociation;
 	public Association(
 			Class<?> sourceClass,
 			Class<?> targetClass)
-//			CardinalityValue sourceCardinality,
-//			CardinalityValue targetCardinality)
+	{
+		this(sourceClass, targetClass, Navigability.DEFAULT);
+	}
+	
+	public Association(
+			Class<?> sourceClass,
+			Class<?> targetClass, Navigability navigability)
 	{
 		super(RelationType.ASSOCIATION, sourceClass, targetClass);
-//		this.sourceCardinality = sourceCardinality;
-//		this.targetCardinality = targetCardinality;
+		this.navigability = navigability;
+		isSelfAssociation = sourceClass.equals(targetClass);
+	}
+	
+	public boolean isSelfAssociation() {
+		return isSelfAssociation;
 	}
 
-//	public CardinalityValue getSourceCardinality() {
-//		return sourceCardinality;
-//	}
-//
-//	public CardinalityValue getTargetCardinality() {
-//		return targetCardinality;
-//	}
+	public Navigability getNavigability() {
+		return navigability;
+	}
+
+	public void setNavigability(Navigability navigability) {
+		this.navigability = navigability;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString().replaceFirst(" ]$", ", " + navigability + " ]");
+	}
 }

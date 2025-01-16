@@ -17,7 +17,7 @@ public class Clazz {
 	private String name;
 	private ClassType type;
 	private RelationManager relationManager;
-	private boolean foundRelations;
+	private boolean foundRelations; // used to defer getting relations
 	
 	public Clazz(Class<?> wrappedClass) {
 		this.wrappedClass = wrappedClass;

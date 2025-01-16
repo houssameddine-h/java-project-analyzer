@@ -56,7 +56,7 @@ public class Relation {
 			Objects.equals(targetClass, relation.sourceClass)) {
 			return -1;
 		}
-		return -1;
+		return 0;
 	}
 	
 	public int compareTo(Relation relation) {
@@ -79,7 +79,7 @@ public class Relation {
 
 	public String toString() {
 		return "[ " + type + ", " +
-				new Clazz(sourceClass).getName() + ", " +
-				new Clazz(targetClass).getName() + " ]";
+				sourceClass.getSimpleName() + ", " +
+				targetClass.getSimpleName() + " ]";
 	}
 }

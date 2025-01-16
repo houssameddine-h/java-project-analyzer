@@ -11,11 +11,10 @@ public class Main {
 	void projectAnalyzerExample() {
 		Project project = new Project(PROJECT_PATH);
 		for (Package pack : project.getPackages()) {
-			String packageName = pack.getName();
-			log("📁 " + packageName);
+			log("📁 " + pack.getName());
 			for (Clazz clz : pack.getClasses()) {
 				log("    📜 " + clz.getName() + " : " + clz.getType());
-				for (Relation relation : clz.getRelations()) {
+				for (Relation relation : project.getRelations(clz)) {
 					log("\t🔗 " + relation);
 				}
 			}

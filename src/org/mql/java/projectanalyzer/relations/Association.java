@@ -1,6 +1,6 @@
 package org.mql.java.projectanalyzer.relations;
 
-public class Association extends Relation {
+public class Association extends Relation<Class<?>, Class<?>> {
 	private Navigability navigability;
 	private boolean isSelfAssociation;
 	public Association(

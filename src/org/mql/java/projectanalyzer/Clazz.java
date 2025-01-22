@@ -60,7 +60,7 @@ public class Clazz {
 		return type;
 	}
 	
-	public Relation[] getRelations() {
+	public Relation<Class<?>, Class<?>>[] getRelations() {
 		if (!foundRelations) {
 			findRelations(); // updates relation manager
 			foundRelations = true;
@@ -71,7 +71,7 @@ public class Clazz {
 	
 	private void findRelations() {
 		// extension
-		Optional<Relation> extensionOpt = getExtension();
+		Optional<Relation<Class<?>, Class<?>>> extensionOpt = getExtension();
 		extensionOpt.ifPresent(ext -> relationManager.addRelation(ext));
 		
 		// realisations
@@ -84,26 +84,27 @@ public class Clazz {
 		relationManager.addRelation(getDependencies());
 	}
 	
-	private Optional<Relation> getExtension() {
+	private Optional<Relation<Class<?>, Class<?>>> getExtension() {
 		if (type == ClassType.CLASS) { // other types can't have custom super calss
 			Class<?> superClass = wrappedClass.getSuperclass();
 			if (!Object.class.equals(superClass)) {
 				return Optional.of(
-					new Relation(RelationType.EXTENSION, wrappedClass, superClass)
+					new Relation<Class<?>, Class<?>>(RelationType.EXTENSION, wrappedClass, superClass)
 				);
 			}
 		}
 		return Optional.empty();
 	}
 	
-	private Relation[] getRealisations() {
-		List<Relation> realisations = new ArrayList<>();
+	@SuppressWarnings("unchecked")
+	private Relation<Class<?>, Class<?>>[] getRealisations() {
+		List<Relation<Class<?>, Class<?>>> realisations = new ArrayList<>();
 		// annotations can't implement interfaces
 		if (type != ClassType.ANNOTATION) {
 			Class<?> interfaces[] = wrappedClass.getInterfaces();
 			for (Class<?> interf : interfaces) {
 				realisations.add(
-					new Relation(RelationType.REALISATION, wrappedClass, interf)
+					new Relation<Class<?>, Class<?>>(RelationType.REALISATION, wrappedClass, interf)
 				);
 			}
 		}
@@ -126,8 +127,9 @@ public class Clazz {
 		return associations.toArray(Association[]::new);
 	}
 	
-	private Relation[] getDependencies() {
-		List<Relation> dependencies = new ArrayList<>();
+	@SuppressWarnings("unchecked")
+	private Relation<Class<?>, Class<?>>[] getDependencies() {
+		List<Relation<Class<?>, Class<?>>> dependencies = new ArrayList<>();
 		List<Class<?>> foundTypes = new ArrayList<>();
 		Method methods[] = wrappedClass.getDeclaredMethods();
 		for (Method method : methods) {
@@ -144,7 +146,7 @@ public class Clazz {
 				!type.equals(void.class) &&
 				!type.equals(wrappedClass)) {
 				dependencies.add(
-					new Relation(RelationType.DEPENDENCY, wrappedClass, type)
+					new Relation<Class<?>, Class<?>>(RelationType.DEPENDENCY, wrappedClass, type)
 				);
 			}
 		}

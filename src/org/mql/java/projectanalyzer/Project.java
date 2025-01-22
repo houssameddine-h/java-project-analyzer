@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.mql.java.projectanalyzer.filesystem.DynamicClassLoader;
 import org.mql.java.projectanalyzer.relations.Relation;
@@ -84,14 +83,15 @@ public class Project {
 		return packages.toArray(Package[]::new);
 	}
 	
-	public Relation[] getRelations() {
+	public Relation<Class<?>, Class<?>>[] getRelations() {
 		return relationManager.getRelations();
 	}
 	
-	public Relation[] getRelations(Clazz clz) {
+	@SuppressWarnings("unchecked")
+	public Relation<Class<?>, Class<?>>[] getRelations(Clazz clz) {
 		return Arrays.stream(getRelations())
-//					.filter(relation -> relation.hasClass(clz))
-					.filter(relation -> relation.getSourceClass().equals(clz.getWrappedClass()))
+//					.filter(relation -> relation.hasItem(clz))
+					.filter(relation -> relation.getSource().equals(clz.getWrappedClass()))
 					.toArray(Relation[]::new);
 	}
 	

@@ -14,7 +14,7 @@ public class Main {
 			log("📁 " + pack.getName());
 			for (Clazz clz : pack.getClasses()) {
 				log("    📜 " + clz.getName() + " : " + clz.getType());
-				for (Relation relation : project.getRelations(clz)) {
+				for (Relation<Class<?>, Class<?>> relation : project.getRelations(clz)) {
 					log("\t🔗 " + relation);
 				}
 			}

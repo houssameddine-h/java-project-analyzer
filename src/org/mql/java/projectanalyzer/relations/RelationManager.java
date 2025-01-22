@@ -9,14 +9,14 @@ import java.util.stream.Collectors;
 import org.mql.java.projectanalyzer.Clazz;
 
 public class RelationManager {
-	private List<Relation> relations;
+	private List<Relation<Class<?>, Class<?>>> relations;
 	private Clazz testClz; // creating a both direction association for testing (to be removed)
 
 	public RelationManager() {
 		relations = new ArrayList<>();
 	}
 	
-	public Relation[] getRelations() {
+	public Relation<Class<?>, Class<?>>[] getRelations() {
 		return getCleanedRelations();
 	}
 	
@@ -25,9 +25,10 @@ public class RelationManager {
 	 * - Not doing it when adding relatoins to avoid possible loss of information;
 	 * - Not updating relations field for the same reason;
 	 */
-	public Relation[] getCleanedRelations() {
-		List<Relation> rels = new ArrayList<Relation>();
-		for (Relation relation : relations) {
+	@SuppressWarnings("unchecked")
+	public Relation<Class<?>, Class<?>>[] getCleanedRelations() {
+		List<Relation<Class<?>, Class<?>>> rels = new ArrayList<>();
+		for (Relation<Class<?>, Class<?>> relation : relations) {
 			if (relation instanceof Association association) {
 				Optional<Association> invert = getInvertIfPresent(association);
 				if (invert.isPresent()) {
@@ -50,13 +51,13 @@ public class RelationManager {
 				.toArray(Association[]::new);
 	}
 	
-	public void addRelation(Relation[] relations) {
-		for (Relation rel : relations) {
+	public void addRelation(Relation<Class<?>, Class<?>>[] relations) {
+		for (Relation<Class<?>, Class<?>> rel : relations) {
 			addRelation(rel);
 		}
 	}
 	
-	public void addRelation(Relation relation) {
+	public void addRelation(Relation<Class<?>, Class<?>> relation) {
 		// Check if stronger relations already exist
 		if (!isRedundant(relation)) {
 			// Remove weaker relations
@@ -68,14 +69,14 @@ public class RelationManager {
 	/*
 	 * add relations already cleaned of redundancies
 	 */
-	public void addCleanedRelations(Relation[] rels) {
-		for (Relation relation : rels) {
+	public void addCleanedRelations(Relation<Class<?>, Class<?>>[] rels) {
+		for (Relation<Class<?>, Class<?>> relation : rels) {
 			relations.add(relation);
 		}
 	}
 	
-	public boolean contains(Relation relation) {
-		for (Relation rel : relations) {
+	public boolean contains(Relation<Class<?>, Class<?>> relation) {
+		for (Relation<Class<?>, Class<?>> rel : relations) {
 			if (rel.equals(relation)) {
 				return true;
 			}
@@ -99,11 +100,11 @@ public class RelationManager {
 	/**
 	 * Remove weaker relations than { @param relation }
 	 */
-	private void removeRedundant(Relation relation) {
+	private void removeRedundant(Relation<Class<?>, Class<?>> relation) {
 		List<RelationType> redundantTypes =
 				RelationType.getWeakerThan(relation.getType());
-		for (Iterator<Relation> i = relations.iterator(); i.hasNext();) {
-			Relation rel = i.next();
+		for (Iterator<Relation<Class<?>, Class<?>>> i = relations.iterator(); i.hasNext();) {
+			Relation<Class<?>, Class<?>> rel = i.next();
 			if (redundantTypes.contains(relation.getType()) &&
 				rel.compareToIgnoreType(relation) == 1) {
 				i.remove();
@@ -114,10 +115,10 @@ public class RelationManager {
 	/**
 	 * Checks if a stronger relation than { @param relation } exists
 	 */
-	private boolean isRedundant(Relation relation) {
+	private boolean isRedundant(Relation<Class<?>, Class<?>> relation) {
 		List<RelationType> redundantTypes =
 				RelationType.getStrongerThan(relation.getType());
-		for (Relation rel : relations) {
+		for (Relation<Class<?>, Class<?>> rel : relations) {
 			if (redundantTypes.contains(relation.getType()) &&
 					rel.compareToIgnoreType(relation) == 1) {
 				return true;

@@ -2,38 +2,31 @@ package org.mql.java.projectanalyzer.relations;
 
 import java.util.Objects;
 
-import org.mql.java.projectanalyzer.Clazz;
-
-public class Relation {
+public class Relation<S, T> {
 	private RelationType type;
-	private Class<?> sourceClass;
-	private Class<?> targetClass;
+	private S source;
+	private T target;
 
-	public Relation(RelationType type, Class<?> sourceClass, Class<?> targetClass) {
+	public Relation(RelationType type, S source, T target) {
 		this.type = type;
-		this.sourceClass = sourceClass;
-		this.targetClass = targetClass;
+		this.source = source;
+		this.target = target;
 	}
 
 	public RelationType getType() {
 		return type;
 	}
 
-	public Class<?> getSourceClass() {
-		return sourceClass;
+	public S getSource() {
+		return source;
 	}
 
-	public Class<?> getTargetClass() {
-		return targetClass;
+	public T getTarget() {
+		return target;
 	}
 	
-	public boolean hasClass(Class<?> cls) {
-		return (sourceClass.equals(cls) || targetClass.equals(cls));
-	}
-	
-	public boolean hasClass(Clazz clz) {
-		Class<?> cls = clz.getWrappedClass();
-		return (sourceClass.equals(cls) || targetClass.equals(cls));
+	public boolean hasItem(Object item) {
+		return (source.equals(item) || target.equals(item));
 	}
 	
 	/**
@@ -43,43 +36,44 @@ public class Relation {
 	 * 	 0 : different
 	 * 	-1 : same relation but with reversed source and target classes
 	 */
-	public int compareToIgnoreType(Relation relation) {
+	@SuppressWarnings("unlikely-arg-type")
+	public int compareToIgnoreType(Relation<S, T> relation) {
 		if (this == relation)
 			return 1;
 		if (relation == null)
 			return 0;
-		if (Objects.equals(sourceClass, relation.sourceClass) &&
-			Objects.equals(targetClass, relation.targetClass)) {
+		if (Objects.equals(source, relation.source) &&
+			Objects.equals(target, relation.target)) {
 			return 1;
 		}
-		if (Objects.equals(sourceClass, relation.targetClass) &&
-			Objects.equals(targetClass, relation.sourceClass)) {
+		if (Objects.equals(source, relation.target) &&
+			Objects.equals(target, relation.source)) {
 			return -1;
 		}
 		return 0;
 	}
 	
-	public int compareTo(Relation relation) {
+	public int compareTo(Relation<S, T> relation) {
 		if (relation != null && type != relation.type) {
 			return 0;
 		}
 		return compareToIgnoreType(relation);
 	}
 
-	public boolean equals(Relation relation) {
+	public boolean equals(Relation<S, T> relation) {
 		if (this == relation)
 			return true;
 		if (relation == null)
 			return false;
 		
 		return type == relation.type &&
-			   Objects.equals(sourceClass, relation.sourceClass) &&
-			   Objects.equals(targetClass, relation.targetClass);
+			   Objects.equals(source, relation.source) &&
+			   Objects.equals(target, relation.target);
 	}
 
 	public String toString() {
 		return "[ " + type + ", " +
-				sourceClass.getSimpleName() + ", " +
-				targetClass.getSimpleName() + " ]";
+				source + ", " +
+				target + " ]";
 	}
 }

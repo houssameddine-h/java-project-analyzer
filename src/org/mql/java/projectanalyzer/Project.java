@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.mql.java.projectanalyzer.filesystem.DynamicClassLoader;
+import org.mql.java.projectanalyzer.relations.PackageRelationManager;
 import org.mql.java.projectanalyzer.relations.Relation;
 import org.mql.java.projectanalyzer.relations.RelationManager;
 
@@ -17,6 +18,7 @@ public class Project {
 	private String binPath;
 	private List<Package> packages;
 	private RelationManager relationManager;
+	private PackageRelationManager packageRelationManager;
 	
 	private DynamicClassLoader classLoader;
 	
@@ -24,6 +26,7 @@ public class Project {
 		packages = new ArrayList<>();
 		packages.add(new Package()); // add default package
 		relationManager = new RelationManager();
+		packageRelationManager = new PackageRelationManager();
 		
 		File srcDir = new File(projectPath + "/src");
 		File binDir = new File(projectPath + "/bin");
@@ -40,6 +43,7 @@ public class Project {
 		scanDir(srcDir, packages.getFirst());
 		// find relations between classes
 		findClassRelations();
+		findPackageRelations();
 	}
 	
 	// scan a package (directory) and put found sub-packages & classes into destPackage
@@ -102,4 +106,24 @@ public class Project {
 			}
 		}
 	}
+	
+	public void findPackageRelations() {
+		Relation<Class<?>, Class<?>>[] classRelations = getRelations();
+		
+		for (Relation<Class<?>, Class<?>> relation : classRelations) {
+			String sourcePackage = relation.getSource().getPackageName();
+			String targetPackage = relation.getTarget().getPackageName();
+			
+			packageRelationManager.addRelation(
+				new Relation<Package, Package>(
+					new Package(sourcePackage), new Package(targetPackage)
+				)
+			);
+		}
+	}
+	
+	public Relation<Package, Package>[] getPackageRelations() {
+		return packageRelationManager.getRelations();
+	}
+	
 }

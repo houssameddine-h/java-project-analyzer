@@ -12,6 +12,10 @@ public class Relation<S, T> {
 		this.source = source;
 		this.target = target;
 	}
+	
+	public Relation(S source, T target) {
+		this(RelationType.DEPENDENCY, source, target);
+	}
 
 	public RelationType getType() {
 		return type;

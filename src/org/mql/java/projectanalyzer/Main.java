@@ -1,6 +1,7 @@
 package org.mql.java.projectanalyzer;
 
 import org.mql.java.projectanalyzer.relations.Relation;
+import org.mql.java.projectanalyzer.ui.JavaProjectAnalyzerFrame;
 
 public class Main {
 	private static final String PROJECT_PATH = "D:\\BackUp\\School\\Master\\Java\\JavaProjectAnalyzer";
@@ -10,15 +11,20 @@ public class Main {
 	
 	void projectAnalyzerExample() {
 		Project project = new Project(PROJECT_PATH);
-		for (Package pack : project.getPackages()) {
-			log("📁 " + pack.getName());
-			for (Clazz clz : pack.getClasses()) {
-				log("    📜 " + clz.getName() + " : " + clz.getType());
-				for (Relation<Class<?>, Class<?>> relation : project.getRelations(clz)) {
-					log("\t🔗 " + relation);
-				}
-			}
-		}
+		new JavaProjectAnalyzerFrame(project);
+//		for (Package pack : project.getPackages()) {
+//			log("📁 " + pack.getName());
+//			for (Clazz clz : pack.getClasses()) {
+//				log("    📜 " + clz.getName() + " : " + clz.getType());
+//				for (Relation<Class<?>, Class<?>> relation : project.getRelations(clz)) {
+//					log("\t🔗 " + relation);
+//				}
+//			}
+//		}
+//		project.getPackageRelations();
+//		for (Relation<Package, Package> relation : project.getPackageRelations()) {
+//			log(relation);
+//		}
 	}
 	
 	private void log(Object o) {

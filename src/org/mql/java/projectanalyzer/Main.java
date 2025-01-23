@@ -25,6 +25,9 @@ public class Main {
 //		for (Relation<Package, Package> relation : project.getPackageRelations()) {
 //			log(relation);
 //		}
+//		for (Package pckg : project.getExternalPackages()) {
+//			log(pckg);
+//		}
 	}
 	
 	private void log(Object o) {

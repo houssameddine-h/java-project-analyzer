@@ -16,7 +16,7 @@ public class Project {
 	
 	private String srcPath;
 	private String binPath;
-//	private List<Package> packages;
+	private List<Package> externalPackages;
 	private Package defaultPackage;
 	private RelationManager relationManager;
 	private PackageRelationManager packageRelationManager;
@@ -24,11 +24,10 @@ public class Project {
 	private DynamicClassLoader classLoader;
 	
 	public Project(String projectPath) {
-		// packages = new ArrayList<>();
+		 externalPackages = new ArrayList<>();
 		// packages.add(new Package()); // add default package
 		defaultPackage = new Package();
 		relationManager = new RelationManager();
-		packageRelationManager = new PackageRelationManager();
 		
 		File srcDir = new File(projectPath + "/src");
 		File binDir = new File(projectPath + "/bin");
@@ -43,6 +42,9 @@ public class Project {
 
 		// scan for packages and classes
 		scanDir(srcDir, defaultPackage);
+		
+		packageRelationManager = new PackageRelationManager(getPackages());
+		
 		// find relations between classes
 		findClassRelations();
 		findPackageRelations();
@@ -90,14 +92,14 @@ public class Project {
 		return defaultPackage;
 	}
 	
-	public Package[] getPackages() {
+	public List<Package> getPackages() {
 		List<Package> result = new ArrayList<>();
 		// Ignore default package if it has no classes
 		if (!defaultPackage.isEmpty()) {
 			result.add(defaultPackage);
 		}
 		result.addAll(defaultPackage.getDescendantPackages());
-		return result.toArray(Package[]::new);
+		return result;
 	}
 	
 	public Relation<Class<?>, Class<?>>[] getRelations() {
@@ -122,17 +124,34 @@ public class Project {
 	
 	public void findPackageRelations() {
 		Relation<Class<?>, Class<?>>[] classRelations = getRelations();
+		List<Package> packages = getPackages();
 		
 		for (Relation<Class<?>, Class<?>> relation : classRelations) {
-			String sourcePackage = relation.getSource().getPackageName();
-			String targetPackage = relation.getTarget().getPackageName();
+			String sourcePackageName = relation.getSource().getPackageName();
+			String targetPackageName = relation.getTarget().getPackageName();
+
+			Package sourcePackage = packageRelationManager.getPackage(sourcePackageName);
+			Package targetPackage = packageRelationManager.getPackage(targetPackageName);
+			if (sourcePackage == null) {
+				sourcePackage = new Package(sourcePackageName, true);
+				packageRelationManager.addPackage(sourcePackage);
+			}
+			
+			if (targetPackage == null) {
+				targetPackage = new Package(targetPackageName, true);
+				packageRelationManager.addPackage(targetPackage);
+			}
 			
 			packageRelationManager.addRelation(
 				new Relation<Package, Package>(
-					new Package(sourcePackage), new Package(targetPackage)
+					sourcePackage, targetPackage
 				)
 			);
 		}
+	}
+	
+	public Package[] getExternalPackages() {
+		return packageRelationManager.getExternalPackages();
 	}
 	
 	public Relation<Package, Package>[] getPackageRelations() {

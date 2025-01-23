@@ -1,15 +1,20 @@
 package org.mql.java.projectanalyzer;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.mql.java.projectanalyzer.relations.Relation;
 import org.mql.java.projectanalyzer.ui.Entity;
 
 public class Package implements Entity {
@@ -21,6 +26,7 @@ public class Package implements Entity {
 	private static final boolean IGNORE_EMPTY = true;
 	
 	private String name;
+	private boolean isExternal;
 	private List<Package> packages;
 	private List<Clazz> classes;
 	
@@ -30,8 +36,10 @@ public class Package implements Entity {
 	private int width;
 	private int height;
 	
-	public Package(String name) {
+	public Package(String name, boolean isExternal) {
 		this.name = name;
+		this.isExternal = isExternal;
+		
 		classes = new ArrayList<>();
 		packages = new ArrayList<>();
 		
@@ -41,12 +49,28 @@ public class Package implements Entity {
 		height = 0;
 	}
 	
+	public Package(String name) {
+		this(name, false);
+	}
+	
 	public Package() {
 		this("default"); // default package
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public boolean isExternal() {
+		return isExternal;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
 	}
 	
 	public Clazz[] getClasses() {
@@ -62,6 +86,9 @@ public class Package implements Entity {
 	 */
 	public List<Package> getDescendantPackages () {
 		List<Package> result = new ArrayList<>();
+		if (isExternal) {
+			return result;
+		}
 		result.addAll(packages);
 		for (Package pckg : packages) {
 			result.addAll(pckg.getDescendantPackages());
@@ -83,7 +110,7 @@ public class Package implements Entity {
 	}
 	
 	public boolean isEmpty() {
-		return classes.isEmpty();
+		return !isExternal && classes.isEmpty();
 	}
 	
 	public boolean hasParentRelationWith(Package with) {
@@ -118,23 +145,21 @@ public class Package implements Entity {
 
 	@Override
 	public Point draw(Graphics g, int x, int y) {
-		Point totalSize = new Point(0, DEFAULT_HEIGHT); // width is calculated based on package name
-		
-		Point currentPosition = new Point(MARGIN, MARGIN);
-		for (Package pckg : packages) {
-			int nextX = IGNORE_EMPTY && pckg.isEmpty() ? x : x + currentPosition.x + PADDING;
-			int nextY = IGNORE_EMPTY && pckg.isEmpty() ? y : y + PADDING * 3;
-			
-			Point size = pckg.draw(g, nextX, nextY);
-			if (IGNORE_EMPTY && pckg.isEmpty()) {
-				continue;
+		if (IGNORE_EMPTY && isEmpty()) {
+			Point s = new Point(0, 0);
+			for (Package pckg : packages) {
+				Point s2 = pckg.draw(g, x, y);
+				s.translate(s2.x, s2.y);
 			}
-			currentPosition.translate(size.x, 0);
-			totalSize.translate(size.x, size.y);
+			return s;
 		}
 		
-		if (IGNORE_EMPTY && isEmpty()) {
-			return totalSize;
+		Point totalSize = new Point(0, DEFAULT_HEIGHT); // width is calculated based on package name
+		Point currentPosition = new Point(MARGIN, MARGIN);
+		for (Package pckg : packages) {
+			Point size = pckg.draw(g, x + currentPosition.x + PADDING, y + PADDING * 3);
+			currentPosition.translate(size.x, 0);
+			totalSize.translate(size.x, size.y);
 		}
 		
 		FontMetrics metrics = g.getFontMetrics();
@@ -159,5 +184,48 @@ public class Package implements Entity {
 		totalSize.translate(textWidth + PADDING * 2 + MARGIN, 0);
 		return totalSize;
 	}
+	
+	public void drawRelation(Graphics g, Relation<Package, Package> relation) {
+		// Graphics2D needed for dashed line and arrow head
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setColor(Color.MAGENTA);
+		Package target = relation.getTarget();
+		
+		Point from = new Point(x + width / 2, y + height);
+		Point to = new Point(target.x, target.y + (target.height / 2));
+		
+		List<Point> midPoints = new LinkedList<>();
+		
+		/*
+		 * 2 dependency cases: internal and external
+		 * both require 3 mid points
+		 */
+		int vertical = (int)(Math.random() * 95 + 5);
+		int horizontal = (int)(Math.random() * 95 + 5);
+		
+		if (target.isExternal()) {
+			// go down
+			midPoints.add(new Point(from.x, from.y + vertical));
+			// go left/right
+			midPoints.add(new Point(to.x - horizontal, midPoints.getFirst().y));
+			// go down
+			midPoints.add(new Point(midPoints.get(1).x, to.y));
+		} else {
+		}
+		g2d.setStroke(new BasicStroke(1.5f));
+		
+		Point last = from;
+		Point next = null;
+		Iterator<Point> i = midPoints.iterator();
+		while(i.hasNext()) {
+			next = i.next();
+			g2d.drawLine(last.x, last.y, next.x, next.y);	
+			last = next;
+		}
+		g2d.drawLine(last.x, last.y, to.x, to.y);
+		
+	}
+	
+	
 	
 }

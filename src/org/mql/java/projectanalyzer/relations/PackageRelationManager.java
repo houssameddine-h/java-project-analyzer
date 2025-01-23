@@ -9,10 +9,13 @@ public class PackageRelationManager {
 	public static final String IGNORED_PACKAGES = "|java.lang|"; // "|p1|p2|p3|"
 	
 	private List<Relation<Package, Package>> relations;
-	public PackageRelationManager() {
+	private List<Package> packages;
+	
+	public PackageRelationManager(List<Package> packages) {
 		relations = new ArrayList<>();
+		this.packages = packages;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public Relation<Package, Package>[] getRelations() {
 		return relations.toArray(Relation[]::new);
@@ -28,6 +31,36 @@ public class PackageRelationManager {
 			!relation.getSource().hasParentRelationWith(relation.getTarget())) {
 			relations.add(relation);			
 		}
+	}
+	
+	public void addPackage(Package packg) {
+		if (!IGNORED_PACKAGES.contains("|" + packg.getName() + "|") && !containsPackage(packg)) {
+			packages.add(packg);
+		}
+	}
+	
+	public boolean containsPackage(Package packg) {
+		for (Package pckg : packages) {
+			if (pckg.equals(packg)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public Package getPackage(String name) {
+		for (Package pckg : packages) {
+			if (pckg.getName().equals(name)) {
+				return pckg;
+			}
+		}
+		return null;
+	}
+	
+	public Package[] getExternalPackages() {
+		return packages.stream()
+			.filter(pckg -> pckg.isExternal())
+			.toArray(Package[]::new);
 	}
 	
 	public boolean contains(Relation<Package, Package> relation) {

@@ -22,7 +22,7 @@ public class JavaProjectAnalyzerFrame extends JFrame {
 	}
 
 	private void buildUI() {
-		JPanel packageDiagramPanel = new PackageDiagram(project.getPackages(), project.getPackageRelations());
+		JPanel packageDiagramPanel = new PackageDiagram(project.getDefaultPackage(), project.getPackageRelations());
 		JScrollPane scrollPane = new JScrollPane(packageDiagramPanel);
 		add(scrollPane);
 	}

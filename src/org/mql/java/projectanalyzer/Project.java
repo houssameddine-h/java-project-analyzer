@@ -16,15 +16,17 @@ public class Project {
 	
 	private String srcPath;
 	private String binPath;
-	private List<Package> packages;
+//	private List<Package> packages;
+	private Package defaultPackage;
 	private RelationManager relationManager;
 	private PackageRelationManager packageRelationManager;
 	
 	private DynamicClassLoader classLoader;
 	
 	public Project(String projectPath) {
-		packages = new ArrayList<>();
-		packages.add(new Package()); // add default package
+		// packages = new ArrayList<>();
+		// packages.add(new Package()); // add default package
+		defaultPackage = new Package();
 		relationManager = new RelationManager();
 		packageRelationManager = new PackageRelationManager();
 		
@@ -40,7 +42,7 @@ public class Project {
 		}
 
 		// scan for packages and classes
-		scanDir(srcDir, packages.getFirst());
+		scanDir(srcDir, defaultPackage);
 		// find relations between classes
 		findClassRelations();
 		findPackageRelations();
@@ -54,9 +56,10 @@ public class Project {
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
 				String packageName = file.getPath().replace(srcPath + "\\", "").replace("\\", ".");
-				Package pack = new Package(packageName);
-				packages.add(pack);
-				scanDir(file, pack);
+				Package pckg = new Package(packageName);
+//				packages.add(pckg);
+				destPackage.addPackage(pckg);
+				scanDir(file, pckg);
 			}
 			else if (file.getName().endsWith(JAVA_FILE_EXTENSION)) {
 				String className = file.getPath()
@@ -74,17 +77,27 @@ public class Project {
 		}
 	}
 	
-	public boolean containsPackage(String packageName) {
-		for (Package packg : packages) {
-			if (packg.getName() == packageName) {
-				return true;
-			}
-		}
-		return false;
+//	public boolean containsPackage(String packageName) {
+//		for (Package packg : packages) {
+//			if (packg.getName() == packageName) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+	
+	public Package getDefaultPackage() {
+		return defaultPackage;
 	}
 	
 	public Package[] getPackages() {
-		return packages.toArray(Package[]::new);
+		List<Package> result = new ArrayList<>();
+		// Ignore default package if it has no classes
+		if (!defaultPackage.isEmpty()) {
+			result.add(defaultPackage);
+		}
+		result.addAll(defaultPackage.getDescendantPackages());
+		return result.toArray(Package[]::new);
 	}
 	
 	public Relation<Class<?>, Class<?>>[] getRelations() {
@@ -100,7 +113,7 @@ public class Project {
 	}
 	
 	private void findClassRelations() {
-		for (Package packg : packages) {
+		for (Package packg : getPackages()) {
 			for (Clazz clz : packg.getClasses()) {
 				relationManager.addCleanedRelations(clz.getRelations());
 			}

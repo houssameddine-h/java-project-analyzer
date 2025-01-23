@@ -21,10 +21,11 @@ public class PackageRelationManager {
 	public void addRelation(Relation<Package, Package> relation) {
 		String sourcePackage = relation.getSource().getName();
 		String targetPackage = relation.getTarget().getName();
-		if (!(IGNORED_PACKAGES.contains("|" + sourcePackage + "|") ||
-			IGNORED_PACKAGES.contains("|" + targetPackage + "|") ||
-			sourcePackage.equals(targetPackage) ||
-			contains(relation))) {
+		if (!IGNORED_PACKAGES.contains("|" + sourcePackage + "|") &&
+			!IGNORED_PACKAGES.contains("|" + targetPackage + "|") &&
+			!sourcePackage.equals(targetPackage) &&
+			!contains(relation) &&
+			!relation.getSource().hasParentRelationWith(relation.getTarget())) {
 			relations.add(relation);			
 		}
 	}

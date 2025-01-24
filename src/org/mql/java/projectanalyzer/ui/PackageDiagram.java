@@ -33,8 +33,8 @@ public class PackageDiagram extends JPanel {
 		int posX = 0;
 		Point size2 = new Point(0, 0);
 		for (Package pckg : externalPackages) {
-			Point pckgSize = pckg.draw(g, posX, size.y + 100);
-			posX += pckgSize.x + 75;
+			Point pckgSize = pckg.draw(g, posX, size.y + 150);
+			posX += pckgSize.x + 100;
 			size2.translate(pckgSize.x, pckgSize.y);
 			
 		}

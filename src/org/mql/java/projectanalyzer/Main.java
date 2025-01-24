@@ -12,19 +12,15 @@ public class Main {
 	void projectAnalyzerExample() {
 		Project project = new Project(PROJECT_PATH);
 		new JavaProjectAnalyzerFrame(project);
-//		for (Package pack : project.getPackages()) {
-//			log("📁 " + pack.getName());
-//			for (Clazz clz : pack.getClasses()) {
-//				log("    📜 " + clz.getName() + " : " + clz.getType());
-//				for (Relation<Class<?>, Class<?>> relation : project.getRelations(clz)) {
-//					log("\t🔗 " + relation);
-//				}
-//			}
-//		}
-//		project.getPackageRelations();
-//		for (Relation<Package, Package> relation : project.getPackageRelations()) {
-//			log(relation);
-//		}
+		for (Package pack : project.getPackages()) {
+			log("📁 " + pack.getName());
+			for (Clazz clz : pack.getClasses()) {
+				log("    📜 " + clz.getName() + " : " + clz.getType());
+				for (Relation<Class<?>, Class<?>> relation : project.getRelations(clz)) {
+					log("\t🔗 " + relation);
+				}
+			}
+		}
 //		for (Package pckg : project.getExternalPackages()) {
 //			log(pckg);
 //		}

@@ -39,10 +39,6 @@ public class Clazz {
 		return wrappedClass;
 	}
 	
-//	public boolean hasRelationWith(RelationType relationType, Clazz with) {
-//		return true;
-//	}
-	
 	private static ClassType getClassType(Class<?> cls) {
 		ClassType type = ClassType.CLASS;
 		if (cls.isAnnotation()) type = ClassType.ANNOTATION;

@@ -16,7 +16,6 @@ public class Project {
 	
 	private String srcPath;
 	private String binPath;
-	private List<Package> externalPackages;
 	private Package defaultPackage;
 	private RelationManager relationManager;
 	private PackageRelationManager packageRelationManager;
@@ -24,8 +23,6 @@ public class Project {
 	private DynamicClassLoader classLoader;
 	
 	public Project(String projectPath) {
-		 externalPackages = new ArrayList<>();
-		// packages.add(new Package()); // add default package
 		defaultPackage = new Package();
 		relationManager = new RelationManager();
 		
@@ -124,7 +121,6 @@ public class Project {
 	
 	public void findPackageRelations() {
 		Relation<Class<?>, Class<?>>[] classRelations = getRelations();
-		List<Package> packages = getPackages();
 		
 		for (Relation<Class<?>, Class<?>> relation : classRelations) {
 			String sourcePackageName = relation.getSource().getPackageName();

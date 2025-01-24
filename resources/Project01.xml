@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="JavaProjectAnalyzer">
+    <package name="org.mgl.java.projectanalyzer">
+    	<package name=""></package>
+    	<class name="Clazz">
+    		<attributes>
+				<attribute name="wrappedClass" type="Class" visibility="private"/>
+                <attribute name="name" type="String" visibility="private"/>
+                <attribute name="type" type="ClassType" visibility="private"/>
+			</attributes>
+                <methods>
+                    <method name="getName" returnType="String" visibility="public" />
+                    <method name="getType" returnType="ClassType" visibility="public" />
+                </methods>
+                
+			<!-- To be completed -->
+    	</class>
+    </package>
+</project>

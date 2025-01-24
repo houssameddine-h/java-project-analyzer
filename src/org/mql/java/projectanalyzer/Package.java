@@ -188,44 +188,14 @@ public class Package implements Entity {
 	public void drawRelation(Graphics g, Relation<Package, Package> relation) {
 		// Graphics2D needed for dashed line and arrow head
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.setColor(Color.MAGENTA);
+		g2d.setColor(Color.DARK_GRAY);
 		Package target = relation.getTarget();
 		
 		Point from = new Point(x + width / 2, y + height);
 		Point to = new Point(target.x, target.y + (target.height / 2));
 		
-		List<Point> midPoints = new LinkedList<>();
-		
-		/*
-		 * 2 dependency cases: internal and external
-		 * both require 3 mid points
-		 */
-		int vertical = (int)(Math.random() * 95 + 5);
-		int horizontal = (int)(Math.random() * 95 + 5);
-		
-		if (target.isExternal()) {
-			// go down
-			midPoints.add(new Point(from.x, from.y + vertical));
-			// go left/right
-			midPoints.add(new Point(to.x - horizontal, midPoints.getFirst().y));
-			// go down
-			midPoints.add(new Point(midPoints.get(1).x, to.y));
-		} else {
-		}
-		g2d.setStroke(new BasicStroke(1.5f));
-		
-		Point last = from;
-		Point next = null;
-		Iterator<Point> i = midPoints.iterator();
-		while(i.hasNext()) {
-			next = i.next();
-			g2d.drawLine(last.x, last.y, next.x, next.y);	
-			last = next;
-		}
-		g2d.drawLine(last.x, last.y, to.x, to.y);
+		g2d.drawLine(from.x, from.y, to.x, to.y);
 		
 	}
-	
-	
 	
 }
